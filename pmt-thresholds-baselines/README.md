@@ -1,12 +1,14 @@
 # Instructions
-This folder contains the script `makeConfigurationWithBaselineThreshold.sh` that takes an existing configuration placed in the `./basedir` directory and creates another one in the `./workdir` directory, setting new baselines and thresholds for the PMT digitizers.
+This folder contains the script `makeConfigurationWithBaselineThreshold.sh` that takes an existing configuration placed in the `./basedir` directory and creates another one in the `./workdir` directory, setting new channel pedestals (DC offsets),  baselines and thresholds for the PMT digitizers.
 
-The script updates the `BaselineChXX` and `triggerThresholdXX` parameters in the configuration files. Note that `BaselineXX` values are only used to compute the `triggerThresholdXX` values, but they are not written directly in the board registers.
+The script updates the `BaselineChXX`, `channelPedestalXX` and `triggerThresholdXX` parameters in the PMT configuration files. Note that `BaselineXX` values are only used to compute the `triggerThresholdXX` values, but they are not written directly in the board registers. The baselines are configured into the boards with the `channelPedestal` values that control the DC offsets. The relationship between `channelPedestalXX` and `BaselineChXX` is determined via a channel-by-channel calibration.
+
+The spare channels which are used for trigger pulses are kept at fixed values (very high thresholds to avoid wrong majorities from them).
 
 ## Setting up
 The code requires some specific python libraries, so the advice is to set up a python environment in which to install everything. To do so:
 
-1. First, get a recent version of `icaruscode`: `setup icaruscode v09_63_00 -q e20:prof`
+1. First, get a recent version of `icaruscode`: `setup icaruscode v09_66_02 -q e20:prof`
 2. Create the environment at a destination of your preference:  `python3 -m venv /path/to/env/`
 3. Do `source path/to/env/bin/activate`
 4. Finally, install all requirements:  `python -m pip install -r requirement.txt`
@@ -17,20 +19,22 @@ After the first time, do step 1 and 3 to activate the environment each time.
 
 ## Inputs
 The new baselines need to be provided in a `.csv` file.
-The code expects at least two columns named "`channel_id`" and "`baseline`".
+The code expects at least three columns named "`channel_id`", "`baseline`" and "`DC_offset`".
 The channel ID is the "LArSoft" channel number, not the PMT ID number.
 
-These baselines can be extracted from data.
+The value of the baselines in the file are assumed to be the measured zero signal ADC value  when setting the corresponding DC offset of the DAC.
+This code does not check for consistency: it is up to the user to check that the values in the input files are correct!
+These are to be determined via calibration from data, channel-by-channel.
 
-For example:
+File structure example:
 ```
-channel_id,baseline,...,
-0,14500.2,...,
-1,18349.3,...,
-2,16574,...,
+channel_id,baseline,DC_offset,
+0,14500.2,7530,
+1,18349.3,6543,
+2,16574,4325,
 ...,
-358,16273.2,...,
-359,19342.0,...,
+358,16273.2,3526,
+359,19342.0,1746,
 ```
 
 ## How to run

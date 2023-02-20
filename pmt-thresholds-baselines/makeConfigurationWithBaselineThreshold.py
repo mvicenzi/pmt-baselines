@@ -17,6 +17,12 @@ def get_baseline(df, ch):
     
     return baseline.values[0][0]
 
+def get_DC_offset(df, ch):
+
+	dc_offset = df.loc[df['channel_id']==ch, ['DC_offset']]
+  	
+	return dc_offset.values[0][0]
+
 #----------------------------------------------------------------
 # helper functions to map board/digitizer channel to channel id
 
@@ -63,7 +69,7 @@ def get_board_label(filename):
 # editing the file --> change baselines and thresholds
 
 def editFile( filename, baseline_file, set_threshold ):
-    
+ 
 	readfile = open( filename, 'r' )
 	board_label = get_board_label(filename)
 	set_baselines = read_baselines(baseline_file)
@@ -94,7 +100,7 @@ def editFile( filename, baseline_file, set_threshold ):
 
 			new_baselines[digitizer_channel] = new_bl  #save for later threshold computation
             
-            # replace old baseline with new baseline
+            		# replace old baseline with new baseline
 			# print( new_bl)
 			line = line.replace( ("BaselineCh%d: %d" % (digitizer_channel, old_bl) ), ("BaselineCh%d: %d" % (digitizer_channel, new_bl) ))
             
@@ -115,7 +121,26 @@ def editFile( filename, baseline_file, set_threshold ):
 				new_threshold = 100  #make sure it never triggers --> huge threshold
                                 
 			line = line.replace( ("triggerThreshold%d: %d" % (digitizer_channel, old_threshold) ), ("triggerThreshold%d: %d" % (digitizer_channel, new_threshold) )  )
-            
+            	
+		if "channelPedestal" in line:
+				
+			argline = line.split(".")[-1]
+			buff = argline.split(":")		
+			digitizer_channel = int(buff[0].split("channelPedestal")[-1]) #these go from 0 to 15
+			dc_offset_old = int(buff[1])
+			new_dc_offset = 0 
+
+			if (digitizer_channel != 15): #last digitizer channel has no pmt   
+                
+				channel_id = get_channel_id(map, board_label, digitizer_channel) #in db, expected 0 to 15
+				new_dc_offset = get_DC_offset(set_baselines,channel_id)
+                
+			else: 
+				new_dc_offset = 7537  #should be equivalent to 14500
+                                
+			line = line.replace( ("channelPedestal%d: %d" % (digitizer_channel, dc_offset_old) ), ("channelPedestal%d: %d" % (digitizer_channel, new_dc_offset) )  )
+			
+
 		new_file_content += line+"\n"
                                 
 	readfile.close()
