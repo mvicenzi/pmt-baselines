@@ -22,9 +22,9 @@ The new baselines need to be provided in a `.csv` file.
 The code expects at least three columns named "`channel_id`", "`baseline`" and "`DC_offset`".
 The channel ID is the "LArSoft" channel number, not the PMT ID number.
 
-The value of the baselines in the file are assumed to be the measured zero signal ADC value  when setting the corresponding DC offset of the DAC.
-This code does not check for consistency: it is up to the user to check that the values in the input files are correct!
+The values of the baselines in the file are assumed to be the measured zero-signal ADC values obtained when setting the corresponding DC offset.
 These are to be determined via calibration from data, channel-by-channel.
+This code does not check for consistency: it is up to the user to check that the values in the input files are correct!
 
 File structure example:
 ```
@@ -38,7 +38,6 @@ channel_id,baseline,DC_offset,
 ```
 
 ## How to run
-
 The script can be run with
 ```
 source makeConfigurationWithBaselineThreshold.sh new_threshold /path/to/baselines.csv
