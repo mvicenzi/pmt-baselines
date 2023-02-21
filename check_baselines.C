@@ -32,7 +32,7 @@ std::map<int, std::map<int,UShort_t>> ReduceToMeanPerChannel(std::map<int,std::m
 
 void printToCSV(std::string run_number, std::map<int,int> timestamps, std::map<int, std::map<int,UShort_t>> reduced_baselines){
 
-	std::string filename = run_number + "/measChannelBaselines_run" + run_number + ".csv";
+	std::string filename = "runs/" + run_number + "/measChannelBaselines_run" + run_number + ".csv";
   	
 	std::ofstream fout;
   	fout.open(filename, ios::out);
@@ -56,7 +56,7 @@ void check_baselines(int run_number)
 {
 
 	std::string run = std::to_string(run_number);
-	std::string filename = run + "/dumpLightInfo_run" + run + ".root";  
+	std::string filename = "runs/" + run + "/dumpLightInfo_run" + run + ".root";  
 
 	TFile *ifile = new TFile(filename.c_str());
 	TDirectory *dir = (TDirectory *)ifile->Get("simpleLightAna");

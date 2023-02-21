@@ -1,8 +1,8 @@
 export run=$1
-export limit=200
-export list="${run}/files-run${run}.txt"
+export limit=10
+export list="runs/${run}/files-run${run}.txt"
 
-mkdir -p ${run}
+mkdir -p "runs/${run}"
 
 echo "creating file list $list"
 
