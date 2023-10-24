@@ -19,7 +19,7 @@ services:
    PMTTimingCorrections: @local::icarus_pmttimingservice
 }
 
-services.IICARUSChannelMap.ChannelMappingTool: @local::ChannelMappingPostGres
+#services.IICARUSChannelMap.ChannelMappingTool: @local::ChannelMappingPostGres
 
 
 #Look at the input files
