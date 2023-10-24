@@ -26,7 +26,7 @@ def get_DC_offset(df, ch):
 #----------------------------------------------------------------
 # helper functions to map board/digitizer channel to channel id
 
-def readSqlitedb(database="/cvmfs/icarus.opensciencegrid.org/products/icarus/icarus_data/v09_62_00/icarus_data/database/ChannelMapICARUS.db", table="pmt_placements"):
+def readSqlitedb(database="/cvmfs/icarus.opensciencegrid.org/products/icarus/icarus_data/v09_79_01/icarus_data/database/ChannelMapICARUS_20230829.db", table="pmt_placements_29aug2023"):
 
     # Read sqlite query results into a pandas DataFrame
     con = sqlite3.connect(database)
@@ -165,7 +165,7 @@ for pmt_component in pmt_components:
 	editFile( foldername+pmt_component, baselines, set_threshold )
 
 # Change name to the folder
-newfoldername = foldername.replace( "thr380", ("thr%d"%set_threshold) )
+newfoldername = foldername.replace( "thr390", ("thr%d"%set_threshold) )
 
 print("Creating a configuration {} with threshold {}".format(newfoldername, set_threshold))
 
