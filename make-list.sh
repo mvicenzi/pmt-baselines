@@ -1,5 +1,5 @@
 export run=$1
-export limit=200
+export limit=2
 export list="runs/${run}/files-run${run}.txt"
 
 mkdir -p "runs/${run}"

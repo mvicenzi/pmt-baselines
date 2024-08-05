@@ -1,6 +1,6 @@
 export run=$1
 export list="runs/${run}/files-run${run}.txt"
-export limit=200
+export limit=2
 export fcl="dumpLightInfo.fcl"
 
 
