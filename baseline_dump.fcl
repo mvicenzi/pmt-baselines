@@ -1,0 +1,88 @@
+# Simple off-the-shelf example to run the light analysis
+
+#include "services_common_icarus.fcl"
+#include "channelmapping_icarus.fcl"
+#include "timing_icarus.fcl"
+#include "decoderdefs_icarus.fcl"
+#include "icarus_opdetwaveform_dumper.fcl"
+#include "icarus_ophitfinder.fcl"
+
+process_name: opwfdump
+
+services:
+{
+                                 @table::icarus_art_services
+    message:                     @local::icarus_message_services_interactive_debug
+  
+                                 @table::icarus_geometry_services
+    DetectorClocksService:       @local::icarus_detectorclocks
+    IICARUSChannelMap:           @local::icarus_channelmappinggservice
+    IPMTTimingCorrectionService: @local::icarus_pmttimingservice
+  
+    TFileService: { fileName: "Trees-%ifb_%tc-%p.root" }
+}
+
+
+# Make sure to get rid of NuRandomSvc (not thread save)
+services.NuRandomService: @erase
+
+# turn off the sam metadata for testing
+services.FileCatalogMetadata: {}
+
+#Look at the input files
+source:
+{
+  module_type: RootInput
+  fileNames:  [ "data.root" ]
+  maxEvents:   -1       # Number of events to create
+}
+
+physics:
+{
+
+    producers:
+    {
+      triggerconfig: @local::extractTriggerConfig
+      pmtconfig:     @local::extractPMTconfig
+    
+      daqTrigger:    @local::decodeTriggerAutodetect
+    
+      daqPMT:        @local::decodePMT
+      pmtbaselines:  @local::icarus_opreco_pedestal_fromchannel_data  # from icarus_ophitfinder.fcl 
+    }
+
+    analyzers: 
+    {
+      waveforms:     @local::icarus_opdetwaveform_dumper
+    }
+
+
+    my_producer_module: [ triggerconfig, pmtconfig, daqTrigger, daqPMT, pmtbaselines ]
+    
+    a: [ waveforms ]
+
+    end_paths: [a]
+}
+
+## overlayOpWaveforms
+## shifted ? opdaq
+## daqPMT
+#physics.analyzers.waveforms.InputLabel: "opdaq"
+physics.analyzers.waveforms.BaselineLabel: "pmtbaselines"
+physics.analyzers.waveforms.OnlyBaselines: true
+#physics.analyzers.waveforms.InputLabel: "daqPMT:globtrg"
+
+### REQUIRED PRODUCERS ###
+#physics.producers.daqTrigger: @local::decodeTriggerV2
+#physics.producers.daqTrigger.FragmentsLabel: "daq:ICARUSTriggerUDP" # but it's called UDP
+
+
+#physics.producers.daqTrigger.DecoderTool.Decoders[0].ToolConfig.TrigConfigLabel: triggerconfig
+#physics.producers.daqTrigger.DecoderTool.Decoders[1].ToolConfig.TrigConfigLabel: triggerconfig
+#physics.producers.daqTrigger.DecoderTool.Decoders[2].ToolConfig.TrigConfigLabel: triggerconfig
+physics.producers.daqPMT.PMTconfigTag: pmtconfig # required
+physics.producers.daqPMT.TriggerTag:   daqTrigger # required
+
+physics.producers.daqPMT.RequireBoardConfig: false
+physics.producers.daqPMT.RequireKnownBoards: false
+#physics.producers.daqTrigger.DiagnosticOutput: true
