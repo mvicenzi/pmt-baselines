@@ -1,3 +1,15 @@
+#############################################################
+## File: loadConfigPedestalThreshold.py
+## Author: Matteo Vicenzi (mvicenzi@bnl.gov)
+## Description: 
+##   This script loads the pedestal, target baseline and theshold 
+##   values from a .csv file into a new DAQ configutation. 
+##   It takes as input a configuration (tipically in /workdir) and
+##   creates another one in the same directory with the new settings.
+## Usage:
+##   python loadConfigPedestalThreshold.py <path-to-csv> <path-to-config> <new-name>
+## 
+
 import pandas as pd
 import numpy as np
 import sys, os
@@ -95,21 +107,25 @@ def editFile( filename, dfconfig ):
 def main():
 
     configfile = sys.argv[1]
-    foldername = sys.argv[2]
+    workdirpath = sys.argv[2]
     newfoldername = sys.argv[3]
     
     confname = configfile.split("/")[-1].rstrip(".csv")
-
     dfconfig = pd.read_csv(configfile,sep=',')
+    
+    if workdirpath[-1] != "/":
+        workdirpath += "/"
+    workdir = "/".join(workdirpath.split("/")[:-2])
+    oldfoldername = workdirpath.split("/")[-2]
 
-    pmt_components = [ filename for filename in os.listdir(foldername)  if "icaruspmt" in filename]
+    pmt_components = [ filename for filename in os.listdir(workdirpath)  if "icaruspmt" in filename]
 
     for pmt_component in pmt_components:	
-        editFile( foldername+pmt_component, dfconfig )
+        editFile( workdirpath+pmt_component, dfconfig )
 
     # Change name to the folder
     print("Creating a configuration '{}' with {}".format(newfoldername, confname))
-    os.system( "mv %s %s" % (foldername, "workdir/"+newfoldername) )
+    os.system( "mv %s %s" % (workdirpath, workdir+"/"+newfoldername) )
 
     
 if __name__ == "__main__":

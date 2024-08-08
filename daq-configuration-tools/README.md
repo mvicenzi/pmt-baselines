@@ -1,9 +1,11 @@
 # Instructions
-This folder contains the script `makeConfigurationWithBaselineThreshold.sh` that takes an existing configuration placed in the `./basedir` directory and creates another one in the `./workdir` directory, setting new channel pedestals (DC offsets),  baselines and thresholds for the PMT digitizers.
+This folder scripts to operate on DAQ configuration to extract, load or update threshold and baseline settings. There are three relevant set of parameters in the PMT `fcl` files:
+- `triggerThresholdXX`: absolute threshold value for channel `XX` in the ADC scale (integer value between `0` and `16383`). These parameters are set inside the board registers to define the threshold levels.
+- `channelPedestalXX`: pedestal or DC offset value for channel `XX` in the DAC scale (integer value between `0` and 65535`. These parameters are set inside the board registers to define the baseline levels.
+- `BaselineChXX`: absolute baseline value for channel `XX` in the ADC scale (integer value between `0` and `16383`. These values are NOT written directly in the board registers, but they are used to compute the `triggerThresholdXX` values given the physical (relative) threshold we desire.
 
-The script updates the `BaselineChXX`, `channelPedestalXX` and `triggerThresholdXX` parameters in the PMT configuration files. Note that `BaselineXX` values are only used to compute the `triggerThresholdXX` values, but they are not written directly in the board registers. The baselines are configured into the boards with the `channelPedestal` values that control the DC offsets. The relationship between `channelPedestalXX` and `BaselineChXX` is determined via a channel-by-channel calibration.
-
-The spare channels which are used for trigger pulses are kept at fixed values (very high thresholds to avoid wrong majorities from them).
+The relationship between `channelPedestalXX` and `BaselineChXX` is determined via a channel-by-channel calibration. Unfortunately, in our experience we have seen a lot of instability in this relation.
+Despite keeping the DC offsets constant, baselines can spread out up to +/-100ADC counts from their nominal position. However, the majority of the channels live within +/- 15 ADC counts from the nominal set value.
 
 ## Setting up
 The code requires some specific python libraries, so the advice is to set up a python environment in which to install everything. To do so:
@@ -14,35 +16,19 @@ The code requires some specific python libraries, so the advice is to set up a p
 4. Finally, install all requirements:  `python -m pip install -r requirement.txt`
 
 The required libraries (and much more) are in the file [requirement.txt](../requirement.txt). 
-
 After the first time, do step 1 and 3 to activate the environment each time.
 
-## Inputs
-The new baselines need to be provided in a `.csv` file.
-The code expects at least three columns named "`channel_id`", "`baseline`" and "`DC_offset`".
-The channel ID is the "LArSoft" channel number, not the PMT ID number.
+## Scripts
 
-The values of the baselines in the file are assumed to be the measured zero-signal ADC values obtained when setting the corresponding DC offset.
-These are to be determined via calibration from data, channel-by-channel.
-This code does not check for consistency: it is up to the user to check that the values in the input files are correct!
-
-File structure example:
+- `extractConfigPedestalThreshold.py`: This script is used to extract the pedestal, target baseline and theshold values from a DAQ configutation and store it in a `.csv` file. Usage:
 ```
-channel_id,baseline,DC_offset,
-0,14500.2,7530,
-1,18349.3,6543,
-2,16574,4325,
-...,
-358,16273.2,3526,
-359,19342.0,1746,
+python extractConfigPedestalThreshold.py <config-directory>
+``` 
+- `loadConfigPedestalThreshold.py`: This script loads the pedestal, target baseline and theshold values from a `.csv` file into a new DAQ configuration. It takes as input a configuration (tipically in /workdir) and creates another one in the same directory with the new settings. Usage:
 ```
-
-## How to run
-The script can be run with
+python loadConfigPedestalThreshold.py <path-to-csv> <path-to-config> <new-name>
 ```
-source makeConfigurationWithBaselineThreshold.sh new_threshold /path/to/baselines.csv
+- `updateConfigThresholds.py`: This script updates the PMT relative threshold in a DAQ configuration. It assumes the pedestal and target baseline values are still valid. If that's not the case, update everything using `loadConfigPedestalThreshold.py`. Usage:
 ```
-
-The script will wipe clean `./workdir`, copy there the old configuration and start modifying it.
-At the end, it will attempt to rename it by changing the threshold value in the directory name.
-Note that this step may fail if the naming convention is not what is expected.
+python updateConfigThresholds.py <path-to-config> <new-threshold>
+```

@@ -7,7 +7,7 @@
 ##   It is meant to be run only if the lines are completely
 ##   missing. If not, use the standard update scripts!  
 ## Usage:
-##   python addPedestalLines.py <directory> <pedestal_value?> 
+##   python addPedestalLines.py <directory> <pedestal_value> 
 
 import sys, os
 

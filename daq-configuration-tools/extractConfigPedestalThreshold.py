@@ -1,3 +1,13 @@
+#############################################################
+## File: extractConfigPedestalThreshold.py
+## Author: Matteo Vicenzi (mvicenzi@bnl.gov)
+## Description: 
+##   This script is used to extract the pedestal, target baseline
+##   and theshold values from a DAQ configutation and store it
+##   in a .csv file 
+## Usage:
+##   python extractConfigPedestalThreshold.py <config-directory> 
+
 import pandas as pd
 import numpy as np
 import sys, os

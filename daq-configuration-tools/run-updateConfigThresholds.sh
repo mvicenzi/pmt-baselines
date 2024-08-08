@@ -1,5 +1,4 @@
 export threshold=$1
-export baselines=$2
 
 #Clean the directory
 
@@ -11,11 +10,9 @@ scp -r basedir/* workdir
 
 export config=$( ls -d ./workdir/*/ )
 
-echo $config
-echo $threshold
-echo $baselines
+echo "Applying ${threshold} to ${config}"
 
 # Now edit the files and change the folder name
-python makeConfigurationWithBaselineThreshold.py $config $threshold $baselines
+python updateConfigThresholds.py $config $threshold
 
 

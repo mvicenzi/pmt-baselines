@@ -10,7 +10,6 @@ scp -r basedir/* workdir
 
 export folder=$( ls -d ./workdir/*/ )
 
-
 echo "Applying ${path}/${config} to ${folder}"
 echo "New config name: ${newname}"
 
